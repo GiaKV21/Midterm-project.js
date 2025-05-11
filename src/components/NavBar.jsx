@@ -1,12 +1,14 @@
-'use client';
-import Link from 'next/link';
-import styles from '../styles/navbar.module.css';
+"use client";
+import Link from "next/link";
+import styles from "../styles/navbar.module.css";
 
 export default function NavBar() {
   return (
     <nav className={styles.navbar}>
       <div className={styles.left}>
-        <span className={styles.logo}>amazon</span>
+        <Link href="/products" className={styles.logo}>
+          amazon
+        </Link>
         <Link href="/">All</Link>
         <Link href="#">Today's Deals</Link>
         <Link href="#">Gift Cards</Link>
