@@ -1,5 +1,6 @@
 "use client";
 import { useEffect, useState } from "react";
+import styles from "../../styles/cart.module.css";
 
 export default function CartPage() {
   const [cartItems, setCartItems] = useState([]);
@@ -11,11 +12,7 @@ export default function CartPage() {
       const fetches = localCart.map(async (item) => {
         const res = await fetch(`https://fakestoreapi.com/products/${item.id}`);
         const product = await res.json();
-        return {
-          id: item.id,
-          quantity: item.quantity,
-          product,
-        };
+        return { id: item.id, quantity: item.quantity, product };
       });
       const result = await Promise.all(fetches);
       setCartItems(result);
@@ -35,52 +32,45 @@ export default function CartPage() {
     });
 
     setCartItems(updated);
-    const localCart = updated.map(({ id, quantity }) => ({ id, quantity }));
-    localStorage.setItem("cart", JSON.stringify(localCart));
+    localStorage.setItem(
+      "cart",
+      JSON.stringify(updated.map(({ id, quantity }) => ({ id, quantity })))
+    );
   }
+
   function removeItem(id) {
     const updated = cartItems.filter((item) => item.id !== id);
     setCartItems(updated);
-
-    const localCart = updated.map(({ id, quantity }) => ({ id, quantity }));
-    localStorage.setItem("cart", JSON.stringify(localCart));
+    localStorage.setItem(
+      "cart",
+      JSON.stringify(updated.map(({ id, quantity }) => ({ id, quantity })))
+    );
   }
-  if (isLoading) return <p style={{ padding: "2rem" }}>Loading cart...</p>;
+
+  function handlePurchase() {
+    alert("Thank you for your purchase!");
+    setCartItems([]);
+    localStorage.removeItem("cart");
+  }
+
+  if (isLoading) return <p className={styles.loading}>Loading cart...</p>;
 
   return (
-    <div style={{ padding: "2rem" }}>
-      <h1 style={{ fontSize: "1.8rem", marginBottom: "1.5rem" }}>
-        Shopping Cart
-      </h1>
+    <div className={styles.container}>
+      <h1 className={styles.title}>Shopping Cart</h1>
+
       {cartItems.map(({ id, quantity, product }) => (
-        <div
-          key={id}
-          style={{
-            display: "flex",
-            gap: "1rem",
-            alignItems: "center",
-            marginBottom: "1.5rem",
-            border: "1px solid #ccc",
-            padding: "1rem",
-            borderRadius: "8px",
-          }}
-        >
+        <div key={id} className={styles.cartItem}>
           <img
             src={product.image}
             alt={product.title}
-            style={{
-              width: "100px",
-              height: "100px",
-              objectFit: "contain",
-            }}
+            className={styles.cartImage}
           />
-          <div style={{ flex: 1 }}>
-            <h2 style={{ fontSize: "1rem", marginBottom: "0.5rem" }}>
-              {product.title}
-            </h2>
-            <p style={{ fontWeight: "bold" }}>${product.price.toFixed(2)}</p>
+          <div className={styles.cartInfo}>
+            <h2 className={styles.cartTitle}>{product.title}</h2>
+            <p className={styles.cartPrice}>${product.price.toFixed(2)}</p>
           </div>
-          <div style={{ display: "flex", alignItems: "center", gap: "0.5rem" }}>
+          <div className={styles.cartControls}>
             <button
               onClick={() => updateQuantity(id, -1)}
               disabled={quantity <= 1}
@@ -96,21 +86,33 @@ export default function CartPage() {
             </button>
             <button
               onClick={() => removeItem(id)}
-              style={{
-                marginLeft: "1rem",
-                backgroundColor: "#ff4d4f",
-                color: "white",
-                border: "none",
-                padding: "6px 10px",
-                borderRadius: "4px",
-                cursor: "pointer",
-              }}
+              className={styles.removeButton}
             >
               Remove
             </button>
           </div>
         </div>
       ))}
+
+      <hr className={styles.divider} />
+
+      <div className={styles.summary}>
+        <h2>
+          Order Summary: $
+          {cartItems
+            .reduce(
+              (total, item) => total + item.product.price * item.quantity,
+              0
+            )
+            .toFixed(2)}
+        </h2>
+        <p>
+          Total Items: {cartItems.reduce((sum, item) => sum + item.quantity, 0)}
+        </p>
+        <button onClick={handlePurchase} className={styles.buyButton}>
+          Buy Now
+        </button>
+      </div>
     </div>
   );
 }
