@@ -72,3 +72,6 @@
   cursor: pointer;
   font-weight: bold;
 }
+.loading {
+  padding: 2rem;
+}
